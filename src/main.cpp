@@ -1,75 +1,137 @@
 #include <iostream>
-#include <limits>
 #include <vector>
+#include <limits>
+#include <fstream>
+#include <algorithm>
 using namespace std;
 
-int main() {
-    cout << "Welcome to Smart Study Planner" << endl;
+struct Subject {
+    string name;
+    int hours;
+    string priority;
+};
 
-    int n;
-    vector<string> newsubject;
+vector<Subject> subjects;
+
+void saveToFile() {
+    ofstream file("planner.txt");
+    for (auto s : subjects) {
+        file << s.name << "," << s.hours << "," << s.priority << endl;
+    }
+}
+
+void loadFromFile() {
+    ifstream file("planner.txt");
+    string name, priority;
+    int hours;
+
+    while (getline(file, name, ',')) {
+        file >> hours;
+        file.ignore();
+        getline(file, priority);
+        subjects.push_back({name, hours, priority});
+    }
+}
+
+void addSubject() {
+    Subject s;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    cout << "Enter subject name: ";
+    getline(cin, s.name);
+
+    cout << "Enter study hours: ";
+    cin >> s.hours;
+
+    cout << "Enter priority (High/Medium/Low): ";
+    cin >> s.priority;
+
+    subjects.push_back(s);
+    saveToFile();
+
+    cout << "Added successfully\n";
+}
+
+void viewSubjects() {
+    if (subjects.empty()) {
+        cout << "No subjects added\n";
+        return;
+    }
+
+    int i = 1;
+    for (auto s : subjects) {
+        cout << i++ << ". " << s.name << " | "
+             << s.hours << " hrs | "
+             << s.priority << endl;
+    }
+}
+
+void searchSubject() {
+    string findSub;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    cout << "Enter subject to search: ";
+    getline(cin, findSub);
+
+    bool found = false;
+
+    for (auto s : subjects) {
+        if (s.name == findSub) {
+            cout << s.name << " | " << s.hours << " hrs | " << s.priority << endl;
+            found = true;
+        }
+    }
+
+    if (!found) cout << "Not found\n";
+}
+
+void deleteSubject() {
+    int index;
+    cout << "Enter number to delete: ";
+    cin >> index;
+
+    if (index >= 1 && index <= subjects.size()) {
+        subjects.erase(subjects.begin() + index - 1);
+        saveToFile();
+        cout << "Deleted\n";
+    } else {
+        cout << "Invalid index\n";
+    }
+}
+
+void sortSubjects() {
+    sort(subjects.begin(), subjects.end(), [](Subject a, Subject b) {
+        return a.name < b.name;
+    });
+    cout << "Sorted A-Z\n";
+}
+
+int main() {
+    loadFromFile();
+
+    int choice;
 
     do {
-        cout << "\n1. study plan" << endl;
-        cout << "2. view study plan" << endl;
-        cout << "3. search subject" << endl;
-        cout << "4. exit" << endl;
+        cout << "\n       Smart Study Planner     \n";
+        cout << "1. Add Subject\n";
+        cout << "2. View Subjects\n";
+        cout << "3. Search Subject\n";
+        cout << "4. Delete Subject\n";
+        cout << "5. Sort Subjects\n";
+        cout << "6. Exit\n";
 
-        cout << "enter number 1 to 4: ";
-        cin >> n;
+        cout << "Enter choice: ";
+        cin >> choice;
 
-        if(n == 1){
-            cout << "Enter subject name: ";
-            string subject;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            getline(cin, subject);
+        if (choice == 1) addSubject();
+        else if (choice == 2) viewSubjects();
+        else if (choice == 3) searchSubject();
+        else if (choice == 4) deleteSubject();
+        else if (choice == 5) sortSubjects();
+        else if (choice == 6) cout << "Exiting...\n";
+        else cout << "Invalid choice\n";
 
-            newsubject.push_back(subject);
-            cout << "Subject added!" << endl;
-        }
+    } while (choice != 6);
 
-        else if(n == 2){
-            cout << "Total subjects: " << newsubject.size() << endl;
-
-            int i = 1;
-            for(string x : newsubject){
-                cout << i++ << ". " << x << endl;
-            }
-        }
-
-        else if(n == 3){
-            string findSub;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-            cout << "Enter subject to search: ";
-            getline(cin, findSub);
-
-            bool found = false;
-
-            for(string x : newsubject){
-                if(x == findSub){
-                    found = true;
-                    break;
-                }
-            }
-
-            if(found){
-                cout << "Subject found!" << endl;
-            } else {
-                cout << "Subject not found" << endl;
-            }
-        }
-
-        else if(n == 4){
-            cout << "Exiting..." << endl;
-        }
-
-        else{
-            cout << "Invalid input!" << endl;
-        }
-
-    } while(n != 4);
-
-    cout << "Good Bye" << endl;
     return 0;
 }

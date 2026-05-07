@@ -1,0 +1,3 @@
+maths,5,High
+dsa,2,medium
+algo,1,.5
